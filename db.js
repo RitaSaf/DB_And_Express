@@ -1,38 +1,31 @@
-const express = require('express');
-const createDBConnection = require('./db'); // Import the function
-const app = express();
+const { Pool } = require('pg');
+require('dotenv').config();
 
-const port = process.env.PORT || 3000;
-app.use(express.json());
+function createDBConnection() {
+  const environment = process.env.NODE_ENV || 'local';
 
-// Create the DB pool
-const poolConnector = createDBConnection();
+  let pool;
 
-// Helper function to query DB
-const queryDb = async (queryText, params) => {
-  const clientDb = await poolConnector.connect();
-  try {
-    const res = await clientDb.query(queryText, params);
-    return res;
-  } catch (err) {
-    console.error('DB Error:', err);
-    throw err;
-  } finally {
-    clientDb.release();
+  if (environment === 'local') {
+    pool = new Pool({
+      user: process.env.LOCAL_DB_USER,
+      host: process.env.LOCAL_DB_HOST,
+      database: process.env.LOCAL_DB_NAME,
+      password: process.env.LOCAL_DB_PASSWORD,
+      port: process.env.LOCAL_DB_PORT,
+    });
+  } else if (environment === 'remote') {
+    pool = new Pool({
+      user: process.env.REMOTE_DB_USER,
+      host: process.env.REMOTE_DB_HOST,
+      database: process.env.REMOTE_DB_NAME,
+      password: process.env.REMOTE_DB_PASSWORD,
+      port: process.env.REMOTE_DB_PORT,
+      ssl: { rejectUnauthorized: false }
+    });
   }
-};
 
-// Example route
-app.get('/projects', async (req, res) => {
-  try {
-    const result = await queryDb("SELECT * FROM projects");
-    res.json(result.rows);
-  } catch (err) {
-    console.error('Select Projects Error:', err);
-    res.status(500).send('Select Projects Error');
-  }
-});
+  return pool;
+}
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+module.exports = createDBConnection;
