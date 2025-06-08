@@ -43,3 +43,13 @@ app.get('/projects',async (req,res)=>{
 app.listen(port,()=>{
     console.log("Server is running ");
 });
+app.get('/users', async (req, res) => {
+  try {
+    const result = await queryDb("SELECT * FROM users");
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Select Users Error:', err);
+    res.status(500).send('Select Users Error');
+  }
+});
+
