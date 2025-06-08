@@ -1,14 +1,13 @@
 const express = require('express');
-const createDBConnection = require('./db');
+const createDBConnection = require('./db'); // Use shared db.js
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 app.use(express.json());
 
-// Connect to DB
-const poolConnector = createDBConnection();
+const poolConnector = createDBConnection(); // Now uses .env
 
-// Reusable query function
 const queryDb = async (queryText, params) => {
   const clientDb = await poolConnector.connect();
   try {
@@ -22,10 +21,9 @@ const queryDb = async (queryText, params) => {
   }
 };
 
-// /projects route
 app.get('/projects', async (req, res) => {
   try {
-    const result = await queryDb("SELECT * FROM projects");
+    const result = await queryDb('SELECT * FROM projects');
     res.json(result.rows);
   } catch (err) {
     console.error('Select Projects Error:', err);
@@ -33,10 +31,9 @@ app.get('/projects', async (req, res) => {
   }
 });
 
-// /users route
 app.get('/users', async (req, res) => {
   try {
-    const result = await queryDb("SELECT * FROM users");
+    const result = await queryDb('SELECT * FROM users');
     res.json(result.rows);
   } catch (err) {
     console.error('Select Users Error:', err);
@@ -45,5 +42,5 @@ app.get('/users', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`✅ Server is running on port ${port}`);
 });
