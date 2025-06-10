@@ -47,6 +47,7 @@ app.get('/fake/users', (req,res) => {
         {id: 2, name: 'Jane Smith', email: 'jane.smith@example.com'},
 
     ];
+    res.status(200).json(fakeUsers);
 });
 
 app.listen(port, () => {
